@@ -1,46 +1,76 @@
-"use client"; // Çok önemli! Kaydırma hareketini dinlemek için bunu en üste yazmalıyız.
+"use client";
 
-import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState } from "react";
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import { Menu, X } from "lucide-react";
 
-export default function Navbar() {
-  const [isScrolled, setIsScrolled] = useState(false);
+export default function Header() {
+  // Mobil menünün açık/kapalı durumunu tutuyoruz
+  const [isOpen, setIsOpen] = useState(false);
 
-  // Sayfa aşağı kaydığında (20px'den fazla) menünün durumunu değiştiriyoruz
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  // Linke tıklayınca menü otomatik kapansın diye ufak bir fonksiyon
+  const closeMenu = () => setIsOpen(false);
 
   return (
-    <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-5xl transition-all duration-300">
-      <div className={`flex items-center justify-between px-8 py-5 rounded-2xl transition-all duration-500 ${
-        isScrolled 
-          ? "bg-[#030712]/80 backdrop-blur-xl border border-white/10 shadow-2xl" 
-          : "bg-transparent border-transparent"
-      }`}>
+    <header className="fixed top-0 left-0 right-0 z-50 bg-[#030712]/80 backdrop-blur-md border-b border-white/5">
+      <div className="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
         
-        {/* Sol Kısım: Logo (text-xl'den text-2xl'ye büyütüldü) */}
-        <Link href="/" className="text-2xl font-extrabold tracking-tighter text-white">
-          B&S <span className="text-blue-500">MEDIA</span>
+        {/* LOGO */}
+        <Link href="/" className="text-2xl font-black text-white tracking-tighter" onClick={closeMenu}>
+          B&S<span className="text-blue-500">MEDIA</span>
         </Link>
 
-        {/* Orta Kısım: Linkler */}
-        <div className="hidden md:flex items-center gap-10 text-base font-semibold text-slate-300">
-          {/* Work yerine Blog geldi */}
-          <Link href="/blog" className="hover:text-white hover:scale-105 transition-all">Blog</Link>
-          <Link href="/contact" className="hover:text-white hover:scale-105 transition-all">Contact Us</Link>
-          <Link href="/about" className="hover:text-white hover:scale-105 transition-all">About Us</Link>
+        {/* BİLGİSAYAR MENÜSÜ (Mobilde Gizli) */}
+        <nav className="hidden md:flex items-center gap-8">
+          <Link href="/blog" className="text-sm font-bold text-slate-300 hover:text-white transition-colors">Blog</Link>
+          <Link href="/contact" className="text-sm font-bold text-slate-300 hover:text-white transition-colors">Contact Us</Link>
+          <Link href="/about" className="text-sm font-bold text-slate-300 hover:text-white transition-colors">About</Link>
+        </nav>
+
+        {/* SAĞ TARAF: Randevu Butonu ve Mobil Menü İkonu */}
+        <div className="flex items-center gap-4">
+          <Link 
+            href="/contact" 
+            className="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-500 hover:scale-105 transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)] text-sm"
+          >
+            Book a Demo
+          </Link>
+          
+          {/* SADECE MOBİLDE GÖRÜNEN HAMBURGER İKONU */}
+          <button 
+            className="md:hidden text-slate-300 hover:text-white transition-colors p-1" 
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            {isOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
         </div>
-        {/* Sağ Kısım: CTA Butonu (Yazı boyutu ve butonun kendisi biraz büyütüldü) */}
-        <button className="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-500 hover:scale-105 transition-all text-base shadow-[0_0_15px_rgba(37,99,235,0.4)]">
-          Book a Demo
-        </button>
-        
       </div>
-    </nav>
+
+      {/* MOBİL AÇILIR MENÜ (Framer Motion ile Süzülerek İner) */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="md:hidden bg-[#030712] border-b border-white/5 overflow-hidden"
+          >
+            <div className="flex flex-col px-6 py-6 gap-6">
+              <Link href="/blog" onClick={closeMenu} className="text-xl font-bold text-slate-300 hover:text-blue-400 transition-colors">
+                Blog
+              </Link>
+              <Link href="/contact" onClick={closeMenu} className="text-xl font-bold text-slate-300 hover:text-blue-400 transition-colors">
+                Contact Us
+              </Link>
+              <Link href="/about" onClick={closeMenu} className="text-xl font-bold text-slate-300 hover:text-blue-400 transition-colors">
+                About
+              </Link>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </header>
   );
 }
