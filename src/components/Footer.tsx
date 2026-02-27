@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { Cpu, Mail } from 'lucide-react';
+import Image from 'next/image'; // YENİ: Logomuz için Image motorunu çağırdık
+import { Mail } from 'lucide-react'; // Cpu ikonunu uçurduk, sadece Mail kaldı
 
 export default function Footer() {
   return (
@@ -11,15 +12,16 @@ export default function Footer() {
 
       <div className="relative z-10 max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-16 mb-16">
         
-        {/* Sol Kısım: Logo ve Açıklama */}
+        {/* Sol Kısım: Yeni SVG Logo ve Açıklama */}
         <div className="w-full md:w-5/12 flex flex-col gap-6">
-          <Link href="/" className="flex items-center gap-3 group w-max">
-            <div className="relative flex items-center justify-center w-12 h-12 bg-blue-600/20 rounded-xl border border-blue-500/30 shadow-[0_0_15px_rgba(37,99,235,0.2)]">
-              <Cpu size={24} className="text-blue-400 group-hover:text-white transition-colors" />
-            </div>
-            <span className="text-2xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white via-slate-200 to-slate-400">
-              B&S <span className="text-blue-500">MEDIA</span>
-            </span>
+          <Link href="/" className="flex items-center hover:opacity-80 transition-opacity w-max">
+            <Image 
+              src="/logo.svg" 
+              alt="B&S Media Logo" 
+              width={180} 
+              height={50} 
+              className="w-auto h-8 md:h-10" 
+            />
           </Link>
           <p className="text-slate-400 text-base leading-relaxed pr-4 font-medium">
             Stop doing repetitive tasks manually. We build custom AI workflows and performance marketing systems to scale your business on autopilot.
@@ -33,7 +35,7 @@ export default function Footer() {
           </a>
         </div>
 
-        {/* Sağ Kısım: Sadece Navigation Linkleri (Sosyal Medya Uçuruldu) */}
+        {/* Sağ Kısım: Navigation Linkleri */}
         <div className="w-full md:w-7/12 flex flex-wrap md:justify-end gap-16 md:gap-32">
           
           <div className="flex flex-col">
@@ -49,15 +51,14 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* En Alt Kısım: Copyright */}
+      {/* En Alt Kısım: Copyright ve Yasal Sayfalar */}
       <div className="relative z-10 max-w-7xl mx-auto pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 text-sm font-medium text-slate-500">
         <p>© 2026 B&S Media. All rights reserved.</p>
         <div className="flex gap-8">
           <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-<Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+          <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
         </div>
       </div>
     </footer>
   );
 }
-
