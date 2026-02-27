@@ -10,9 +10,24 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-// ---- PIXEL ART ENGINE (Karakter Çizim Motoru) ----
-function PixelCanvas({ status, colorScheme }) {
-  const canvasRef = useRef(null);
+// ---- TİP TANIMLAMALARI (TypeScript için şart) ----
+interface PixelCanvasProps {
+  status: string;
+  colorScheme: "blue" | "green";
+}
+
+interface Lead {
+  id?: string;
+  customer_name: string;
+  problem: string;
+  status: string;
+  appointment_date?: string;
+  created_at?: string;
+}
+
+// ---- PIXEL ART ENGINE ----
+function PixelCanvas({ status, colorScheme }: PixelCanvasProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const frame = useRef(0);
   const schemes = {
     blue:  { shirt: "#4169E1", hi: "#6389FF", hair: "#8B4513" },
@@ -24,12 +39,14 @@ function PixelCanvas({ status, colorScheme }) {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    
     ctx.imageSmoothingEnabled = false;
-    let id, last = 0, cx = 60, dir = 1;
+    let id: number, last = 0, cx = 60, dir = 1;
 
-    const p = (x, y, col, s=4) => { ctx.fillStyle=col; ctx.fillRect(x*s,y*s,s,s); };
+    const p = (x: number, y: number, col: string, s=4) => { ctx.fillStyle=col; ctx.fillRect(x*s,y*s,s,s); };
 
-    const draw = (ox, fr, act) => {
+    const draw = (ox: number, fr: number, act: string) => {
       const sk="#F4A460", pt="#2F4F4F", sh="#1a1a1a", ey="#1a1a1a";
       p(ox+2,0,c.hair);p(ox+3,0,c.hair);p(ox+4,0,c.hair);
       p(ox+1,1,c.hair);p(ox+2,1,sk);p(ox+3,1,sk);p(ox+4,1,sk);p(ox+5,1,c.hair);
@@ -45,7 +62,7 @@ function PixelCanvas({ status, colorScheme }) {
       p(ox+2,9,sh);p(ox+4,9,sh);
     };
 
-    const render = (t) => {
+    const render = (t: number) => {
       if (t-last>220){frame.current++;last=t;}
       ctx.clearRect(0,0,canvas.width,canvas.height);
       for(let i=0;i<10;i++){ctx.fillStyle=i%2===0?"#0d0d1a":"#111122";ctx.fillRect(i*16,canvas.height-16,16,16);}
@@ -75,7 +92,7 @@ function PixelCanvas({ status, colorScheme }) {
 }
 
 // ---- CALENDAR COMPONENT ----
-function MiniCalendar({ leads }) {
+function MiniCalendar({ leads }: { leads: Lead[] }) {
   const today = new Date();
   const monthName = today.toLocaleString("tr-TR",{month:"long",year:"numeric"});
   return(
@@ -86,20 +103,18 @@ function MiniCalendar({ leads }) {
   );
 }
 
-// ---- MAIN DASHBOARD (BURAYI DÜZELTTİM) ----
+// ---- MAIN DASHBOARD ----
 export default function Dashboard() {
   const params = useParams();
-  const clientSlug = params.clientSlug;
+  const clientSlug = params.clientSlug as string;
   
-  // State tanımları (mounted hatasız versiyon)
   const [mounted, setMounted] = useState(false);
-  const [leads, setLeads] = useState([]);
+  const [leads, setLeads] = useState<Lead[]>([]);
   const [inbound, setInbound] = useState("idle");
   const [outbound, setOutbound] = useState("idle");
-  const [notif, setNotif] = useState(null);
-  const [time, setTime] = useState(null);
+  const [notif, setNotif] = useState<string | null>(null);
+  const [time, setTime] = useState<Date | null>(null);
 
-  // Hydration hatasını önleyen useEffect
   useEffect(() => {
     setMounted(true);
     setTime(new Date());
@@ -107,7 +122,6 @@ export default function Dashboard() {
     return () => clearInterval(iv);
   }, []);
 
-  // Supabase ve Realtime Bağlantısı
   useEffect(() => {
     if (!clientSlug || !mounted) return;
 
@@ -124,11 +138,11 @@ export default function Dashboard() {
 
     const channel = supabase
       .channel('schema-db-changes')
-      .on('postgres_changes', 
+      .on('postgres_changes' as any, 
         { event: 'INSERT', schema: 'public', table: 'agent_activities', filter: `client_slug=eq.${clientSlug}` }, 
-        (payload) => {
+        (payload: any) => {
           setInbound(payload.new.status || "calling");
-          setLeads(prev => [payload.new, ...prev.slice(0, 19)]);
+          setLeads(prev => [payload.new as Lead, ...prev.slice(0, 19)]);
           
           if (payload.new.status === 'success') {
             setNotif(`🎉 Yeni Randevu: ${payload.new.customer_name}`);
@@ -141,7 +155,6 @@ export default function Dashboard() {
     return () => { supabase.removeChannel(channel); };
   }, [clientSlug, mounted]);
 
-  // Sayfa yüklenene kadar boş ekran göster (Hydration Error için şart)
   if (!mounted) return <div style={{background: "#050507", minHeight: "100vh"}} />;
 
   const appointments = leads.filter(l => l.status === "success").length;
@@ -152,7 +165,6 @@ export default function Dashboard() {
 
       {notif && <div style={{position:"fixed",top:"20px",right:"20px",zIndex:999,background:"rgba(255,215,0,0.15)",border:"1px solid #ffd700",borderRadius:"12px",padding:"12px 20px",color:"#ffd700"}}>{notif}</div>}
 
-      {/* Header Kısmı */}
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"30px"}}>
         <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
           <div style={{width:"40px",height:"40px",borderRadius:"12px",background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"20px",fontWeight:"900"}}>B</div>
@@ -166,7 +178,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* İstatistik Kartları */}
       <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"16px",marginBottom:"24px"}}>
         {[ {l:"Total Leads",v:leads.length,c:"#6366f1"}, {l:"Appointments",v:appointments,c:"#22c55e"}, {l:"Conversion",v:`0%`,c:"#ffd700"}, {l:"Active Agents",v:2,c:"#a78bfa"} ].map((s,i)=>(
           <div key={i} style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:"16px",padding:"20px"}}>
@@ -176,7 +187,6 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Ajanlar ve Takvim */}
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"20px",marginBottom:"20px"}}>
         <div style={{background:"rgba(255,255,255,0.02)",border:`1px solid #6366f144`,borderRadius:"20px",overflow:"hidden"}}>
           <div style={{padding:"15px",background: "rgba(99,102,241,0.1)", fontSize: "12px"}}>ALEX 🎙️</div>
@@ -191,7 +201,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Canlı Aktivite Logu */}
       <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:"20px",overflow:"hidden"}}>
         <div style={{padding:"15px 20px", fontSize: "14px", fontWeight: "bold"}}>LIVE ACTIVITY</div>
         <div style={{maxHeight:"250px",overflowY:"auto", padding: "10px"}}>
