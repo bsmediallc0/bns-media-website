@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Ham çekim dosyaları (HEVC 4K) — deploy'a gitmesin
+media-kaynak/
