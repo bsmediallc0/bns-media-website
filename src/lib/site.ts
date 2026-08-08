@@ -142,3 +142,9 @@ export const SYSTEMS = [
     status: "live",
   },
 ] as const;
+
+// Canlı Şantiye hem SYSTEMS'te (ana sayfa "Sistemler" ızgarasında görünsün
+// diye) hem SERVICES'te (bir drone hizmeti olduğu için) yer alıyor. Seçim
+// yapılan yerlerde (nav, teklif formu) aynı seçenek iki kez görünmesin diye
+// SYSTEMS'in bu filtrelenmiş hâli kullanılır.
+export const SYSTEM_PICKS = SYSTEMS.filter((s) => s.id !== "canli-santiye");

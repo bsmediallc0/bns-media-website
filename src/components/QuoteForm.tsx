@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { SERVICES, SYSTEMS, waLink } from "@/lib/site";
+import { SERVICES, SYSTEM_PICKS, waLink } from "@/lib/site";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
-const ALL_OPTIONS = [...SYSTEMS, ...SERVICES];
+const ALL_OPTIONS = [...SYSTEM_PICKS, ...SERVICES];
 
 export default function QuoteForm() {
   const [choiceId, setChoiceId] = useState<string | null>(null);
@@ -47,7 +47,7 @@ export default function QuoteForm() {
       <div>
         <p className="mono-label text-xs text-body">Hangi sistemle ilgileniyorsun?</p>
         <div className="mt-3 grid grid-cols-2 gap-3">
-          {SYSTEMS.map((s) => {
+          {SYSTEM_PICKS.map((s) => {
             const active = choiceId === s.id;
             return (
               <button

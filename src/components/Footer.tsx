@@ -1,6 +1,6 @@
 import Reveal from "./Reveal";
 import BSLogo from "./BSLogo";
-import { NAV_ITEMS, SERVICES, SYSTEMS, waLink } from "@/lib/site";
+import { NAV_ITEMS, SERVICES, SYSTEM_PICKS, waLink } from "@/lib/site";
 
 const COMPANY_LINKS = NAV_ITEMS.filter((item) => item.label !== "Sistemler" && item.label !== "Hizmetler");
 
@@ -13,7 +13,7 @@ export default function Footer() {
             <div>
               <p className="mono-label text-xs text-white/40">Sistemler</p>
               <ul className="mt-3 space-y-2">
-                {SYSTEMS.map((s) => (
+                {SYSTEM_PICKS.map((s) => (
                   <li key={s.id}>
                     <a href={`/${s.id}`} className="text-sm text-white/65 transition-colors duration-150 hover:text-white">
                       {s.name}

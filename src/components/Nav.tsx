@@ -3,17 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { NAV_ITEMS, SERVICES, SYSTEMS, waLink } from "@/lib/site";
-
-// Canlı Şantiye bir drone hizmeti — Hizmetler'de listeleniyor, Sistemler
-// dropdown'ında tekrar etmesin (ana sayfadaki Sistemler ızgarasında kalmaya devam eder).
-const NAV_SYSTEMS = SYSTEMS.filter((s) => s.id !== "canli-santiye");
+import { NAV_ITEMS, SERVICES, SYSTEM_PICKS, waLink } from "@/lib/site";
 
 const DROPDOWNS: Record<
   string,
   readonly { id: string; name: string; sector: string }[]
 > = {
-  Sistemler: NAV_SYSTEMS,
+  Sistemler: SYSTEM_PICKS,
   Hizmetler: SERVICES,
 };
 
