@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { SERVICES, SYSTEM_PICKS, waLink } from "@/lib/site";
+import { SERVICES, SYSTEM_PICKS } from "@/lib/site";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const ALL_OPTIONS = [...SYSTEM_PICKS, ...SERVICES];
+
+type Status = "idle" | "submitting" | "sent";
 
 export default function QuoteForm() {
   const [choiceId, setChoiceId] = useState<string | null>(null);
@@ -12,35 +14,64 @@ export default function QuoteForm() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
 
-  // Asıl iletişim kanalı WhatsApp — form onu seçilen sistem/hizmetle önceden
-  // doldurulmuş şekilde açar. Supabase bağlıysa aynı zamanda panelde
-  // görünmesi için bir kayıt da düşürür (best-effort).
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!choiceId) {
       setError("Lütfen önce bir sistem ya da hizmet seç.");
       return;
     }
     const choice = ALL_OPTIONS.find((s) => s.id === choiceId)!;
-    const text =
-      `Merhaba, ${choice.name} hakkında ücretsiz teklif almak istiyorum. ` +
-      `Ben ${name || "..."}. ` +
-      (message || "Detayları konuşabilir miyiz?");
+    setError("");
+    setStatus("submitting");
 
     const supabase = getSupabaseBrowserClient();
-    supabase?.from("leads").insert({
-      source: "quote_form",
-      name,
-      phone,
-      email,
-      message,
-      meta: { choice: choice.name, path: window.location.pathname },
-    });
+    if (supabase) {
+      const { error: insertError } = await supabase.from("leads").insert({
+        source: "quote_form",
+        name,
+        phone,
+        email,
+        message,
+        meta: { choice: choice.name, path: window.location.pathname },
+      });
+      if (insertError) {
+        setError("Bir şeyler ters gitti, lütfen tekrar dene.");
+        setStatus("idle");
+        return;
+      }
+    }
 
-    window.open(waLink(text), "_blank", "noopener,noreferrer");
+    setStatus("sent");
   };
+
+  if (status === "sent") {
+    return (
+      <div className="flex flex-col items-center justify-center rounded-3xl bg-white p-8 text-center sm:p-10">
+        <div className="chamfer flex h-12 w-12 items-center justify-center bg-tint">
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#1D5BBF"
+            strokeWidth="2.5"
+            aria-hidden="true"
+          >
+            <path d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <p className="font-display mt-5 text-2xl text-ink">
+          Talebin bize ulaştı.
+        </p>
+        <p className="mt-2 max-w-xs text-[15px] text-body">
+          Anında seninle iletişime geçeceğiz.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -161,13 +192,14 @@ export default function QuoteForm() {
 
       <button
         type="submit"
-        className="chamfer wa-pulse inline-flex items-center gap-2 bg-wa px-6 py-3.5 text-sm font-medium text-wa-ink transition-colors duration-150 hover:bg-[#1fbd5a]"
+        disabled={status === "submitting"}
+        className="chamfer inline-flex items-center gap-2 bg-ink px-6 py-3.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-navy-2 disabled:opacity-60"
       >
-        WhatsApp&apos;ta teklif iste
+        {status === "submitting" ? "Gönderiliyor..." : "Ücretsiz Teklif Al"}
       </button>
       <p className="text-xs text-body/70">
-        Ücretsiz, taahhüt yok. Gönder&apos;e basınca WhatsApp&apos;ta bu
-        bilgilerle doldurulmuş bir mesaj açılır.
+        Ücretsiz, taahhüt yok. Gönder&apos;e basınca anında sana dönüş
+        yaparız.
       </p>
     </form>
   );
