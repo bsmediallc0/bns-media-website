@@ -73,15 +73,15 @@ function PackageCard({
           {cardShowsPrice ? (
             startingFrom ? (
               <>
-                <p className="font-display mt-4 text-4xl text-ink transition-all duration-200">
-                  {formatTL(baseTL)} TL
+                <p className="font-display mt-4 text-3xl leading-tight text-ink transition-all duration-200">
+                  {`${formatTL(baseTL)} TL'den başlıyor`}
                 </p>
                 <p className="mono-label mt-1 text-xs text-blue">+ KDV</p>
               </>
             ) : plainPrice ? (
               <>
-                <p className="font-display mt-4 text-4xl text-ink transition-all duration-200">
-                  {formatTL(baseTL)} TL
+                <p className="font-display mt-4 text-3xl leading-tight text-ink transition-all duration-200">
+                  {`${formatTL(baseTL)} TL'den başlıyor`}
                 </p>
                 <p className="mono-label mt-1 text-xs text-blue">
                   + KDV{isOnce ? "" : ` / ${isMonthly ? "ay" : "yıl"}`}
@@ -101,8 +101,8 @@ function PackageCard({
                 <p className="mono-label mt-4 text-xs text-body line-through decoration-1">
                   {formatTL(baseTL)} TL
                 </p>
-                <p className="font-display mt-1 text-4xl text-ink transition-all duration-200">
-                  {formatTL(discounted)} TL
+                <p className="font-display mt-1 text-3xl leading-tight text-ink transition-all duration-200">
+                  {`${formatTL(discounted)} TL'den başlıyor`}
                 </p>
                 <p className="mono-label mt-1 text-xs text-blue">
                   %25 indirimli · + KDV
