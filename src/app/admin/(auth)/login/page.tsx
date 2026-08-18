@@ -87,7 +87,7 @@ export default function AdminLoginPage() {
 
       <form
         onSubmit={handleSubmit}
-        className="liquid-glass chamfer relative z-10 w-full max-w-sm rounded-3xl p-8 backdrop-blur-xl"
+        className="liquid-glass relative z-10 w-full max-w-sm rounded-3xl p-8 backdrop-blur-xl"
       >
         <span className="font-display text-xl text-white">B&amp;S Media</span>
         <h1 className="font-display mt-2 text-2xl text-white">Panele giriş</h1>
