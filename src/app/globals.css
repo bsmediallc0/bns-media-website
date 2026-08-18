@@ -186,6 +186,32 @@ body {
   }
 }
 
+/* Admin giriş ekranındaki yavaş kayan dalga katmanları — iki katman
+   farklı hızda ve ters yönde kayarak hafif bir derinlik hissi verir. */
+@keyframes login-wave-drift-1 {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes login-wave-drift-2 {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+
+.login-wave-1 {
+  animation: login-wave-drift-1 26s linear infinite;
+}
+
+.login-wave-2 {
+  animation: login-wave-drift-2 34s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-wave-1,
+  .login-wave-2 {
+    animation: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-band {
     animation: none;
