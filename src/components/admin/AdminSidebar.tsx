@@ -4,20 +4,26 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
-const LINKS = [
-  { href: "/admin", label: "Genel Bakış" },
-  { href: "/admin/leads", label: "Talepler" },
-  { href: "/admin/seo", label: "SEO Takibi" },
-] as const;
-
 export default function AdminSidebar({ email }: { email: string }) {
   const pathname = usePathname();
   const router = useRouter();
 
+  // app.bnsmedia.co gibi bir alt alan adındaysak middleware path'i içeride
+  // /admin'e çeviriyor ama tarayıcıdaki gerçek path hiç /admin görmüyor —
+  // usePathname() bunu yansıtır. Linkleri buna göre kuruyoruz ki
+  // app.bnsmedia.co/leads gibi temiz kalsın, /admin/leads'e sıçramasın.
+  const isAppSubdomain = !pathname.startsWith("/admin");
+  const base = isAppSubdomain ? "" : "/admin";
+  const links = [
+    { href: base || "/", label: "Genel Bakış" },
+    { href: `${base}/leads`, label: "Talepler" },
+    { href: `${base}/seo`, label: "SEO Takibi" },
+  ];
+
   const handleLogout = async () => {
     const supabase = getSupabaseBrowserClient();
     await supabase?.auth.signOut();
-    router.push("/admin/login");
+    router.push(isAppSubdomain ? "/login" : "/admin/login");
     router.refresh();
   };
 
@@ -26,7 +32,7 @@ export default function AdminSidebar({ email }: { email: string }) {
       <div>
         <span className="font-display px-2 text-lg text-ink">B&amp;S Media</span>
         <nav className="mt-8 flex flex-col gap-1">
-          {LINKS.map((link) => {
+          {links.map((link) => {
             const active = pathname === link.href;
             return (
               <Link

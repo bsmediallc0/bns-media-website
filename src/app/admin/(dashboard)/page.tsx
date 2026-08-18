@@ -1,8 +1,14 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 export default async function AdminHomePage() {
   const supabase = await getSupabaseServerClient();
+
+  // app.bnsmedia.co gibi bir alt alan adındaysak linkler /admin öneki
+  // olmadan temiz kalsın (middleware bunu içeride /admin'e çeviriyor).
+  const host = (await headers()).get("host") ?? "";
+  const base = host.startsWith("app.") ? "" : "/admin";
 
   const [{ count: leadCount }, { count: newLeadCount }, { count: seoPendingCount }] = supabase
     ? await Promise.all([
@@ -13,9 +19,9 @@ export default async function AdminHomePage() {
     : [{ count: 0 }, { count: 0 }, { count: 0 }];
 
   const stats = [
-    { label: "Toplam talep", value: leadCount ?? 0, href: "/admin/leads" },
-    { label: "Yeni talep", value: newLeadCount ?? 0, href: "/admin/leads" },
-    { label: "Bekleyen SEO talebi", value: seoPendingCount ?? 0, href: "/admin/seo" },
+    { label: "Toplam talep", value: leadCount ?? 0, href: `${base}/leads` },
+    { label: "Yeni talep", value: newLeadCount ?? 0, href: `${base}/leads` },
+    { label: "Bekleyen SEO talebi", value: seoPendingCount ?? 0, href: `${base}/seo` },
   ];
 
   return (

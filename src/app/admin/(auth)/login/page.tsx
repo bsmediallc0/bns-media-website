@@ -31,7 +31,11 @@ export default function AdminLoginPage() {
       return;
     }
 
-    router.push("/admin");
+    // app.bnsmedia.co gibi bir alt alan adındaysak URL'de /admin hiç
+    // görünmemeli — girişten sonra köke dönüyoruz, middleware bunu içeride
+    // /admin'e çeviriyor.
+    const isAppSubdomain = window.location.hostname.startsWith("app.");
+    router.push(isAppSubdomain ? "/" : "/admin");
     router.refresh();
   };
 
