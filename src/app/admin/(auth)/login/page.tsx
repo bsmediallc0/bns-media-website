@@ -27,7 +27,9 @@ export default function AdminLoginPage() {
     setLoading(false);
 
     if (signInError) {
-      setError("E-posta veya şifre yanlış.");
+      // Geçici: gerçek hatayı gösteriyoruz ki "yanlış şifre" mi yoksa
+      // ağ/CORS/proje bağlantısı gibi başka bir sorun mu ayırt edebilelim.
+      setError(`${signInError.message} (status: ${signInError.status ?? "?"})`);
       return;
     }
 
