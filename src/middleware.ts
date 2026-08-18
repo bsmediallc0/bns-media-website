@@ -6,8 +6,9 @@ import { createServerClient } from "@supabase/ssr";
 // app.bnsmedia.co/           -> /admin
 // app.bnsmedia.co/leads      -> /admin/leads
 // app.bnsmedia.co/login      -> /admin/login
-// Ana alan adında (bnsmedia.co) ise eskisi gibi /admin/... path'i çalışmaya
-// devam eder — ikisi de aynı korumadan geçer.
+// Ana alan adında (bnsmedia.co) ise /admin tamamen kapalı — biri elle
+// bnsmedia.co/admin yazarsa ana sayfaya döner, panelin varlığından bile
+// haberi olmaz. Girişin tek yolu app.bnsmedia.co.
 function getAdminContext(request: NextRequest) {
   const host = request.headers.get("host") ?? "";
   const isAppSubdomain = host.startsWith("app.");
@@ -28,24 +29,22 @@ function getAdminContext(request: NextRequest) {
       externalLoginPath: "/login",
       externalHomePath: "/",
       isLoginPath: pathname === "/login",
+      blockOnMainDomain: false,
     } as const;
   }
 
   if (pathname.startsWith("/admin")) {
-    return {
-      isAdminRequest: true,
-      internalPath: pathname,
-      externalLoginPath: "/admin/login",
-      externalHomePath: "/admin",
-      isLoginPath: pathname === "/admin/login",
-    } as const;
+    return { isAdminRequest: false, blockOnMainDomain: true } as const;
   }
 
-  return { isAdminRequest: false } as const;
+  return { isAdminRequest: false, blockOnMainDomain: false } as const;
 }
 
 export async function middleware(request: NextRequest) {
   const ctx = getAdminContext(request);
+  if (ctx.blockOnMainDomain) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
   if (!ctx.isAdminRequest) {
     return NextResponse.next();
   }
